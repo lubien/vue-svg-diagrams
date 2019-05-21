@@ -1,28 +1,51 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <div id="app" ref="parent">
+    <svg :width="width" :height="height">
+      <rect x="0" y="0" :width="width" :height="width" fill="#dedede"></rect>
+      <Step :width="width" :height="height" :initial-x="10" :initial-y ="10" draggable />
+    </svg>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import Step from './components/Step'
 
 export default {
   name: 'app',
-  components: {
-    HelloWorld
+
+  components: { Step },
+
+  data: () => ({
+    width: 600,
+    height: 4000
+  }),
+
+  mounted () {
+    this.handleResize()
+    window.addEventListener('resize', this.handleResize)
+  },
+
+  beforeDestroy () {
+    window.removeEventListener('resize', this.handleResize)
+  },
+
+  methods: {
+    handleResize () {
+      const { width, height } = this.$refs.parent.getBoundingClientRect()
+      this.width = width
+      this.height = height
+    }
   }
 }
 </script>
 
 <style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+html, body, #app {
+  padding: 0;
+  margin: 0;
+}
+
+html, body {
+  overflow: hidden;
 }
 </style>
