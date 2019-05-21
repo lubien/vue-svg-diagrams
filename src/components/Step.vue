@@ -45,8 +45,6 @@
             :y="12"
             :cx="(width * 1/2) - 2"
             :cy="12"
-            width="12"
-            height="12"
             rx="12"
             ry="12"
             fill="#4D4D4D"
@@ -136,6 +134,9 @@
 </template>
 
 <script>
+const MIN_WIDTH = 100
+const MIN_HEIGHT = 50
+
 export default {
   name: 'Step',
 
@@ -208,12 +209,8 @@ export default {
   created () {
     this.x = this.initialX
     this.y = this.initialY
-    this.width = this.initialWidth
-    this.height = this.initialHeight
-  },
-
-  mounted () {
-    // this.resize()
+    this.width = Math.max(MIN_WIDTH, this.initialWidth)
+    this.height = Math.max(MIN_HEIGHT, this.initialHeight)
   },
 
   methods: {
@@ -287,21 +284,21 @@ export default {
       const y = e.pageY
 
       if (this.fixedPositions.top) {
-        this.height = Math.max(10, y - this.fixedPositions.top)
+        this.height = Math.max(MIN_HEIGHT, y - this.fixedPositions.top)
       }
 
       if (this.fixedPositions.bottom) {
         this.y = Math.max(0, y)
-        this.height = Math.max(10, this.fixedPositions.bottom - y)
+        this.height = Math.max(MIN_HEIGHT, this.fixedPositions.bottom - y)
       }
 
       if (this.fixedPositions.right) {
         this.x = Math.max(0, x)
-        this.width = Math.max(10, this.fixedPositions.right - x)
+        this.width = Math.max(MIN_WIDTH, this.fixedPositions.right - x)
       }
 
       if (this.fixedPositions.left) {
-        this.width = Math.max(10, x - this.fixedPositions.left)
+        this.width = Math.max(MIN_WIDTH, x - this.fixedPositions.left)
       }
     },
 
