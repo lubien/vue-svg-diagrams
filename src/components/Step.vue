@@ -2,7 +2,7 @@
   <svg
     :width="svgWidth"
     :height="svgHeight"
-    @blur="stopEditing"
+    @blur="hideControls"
     tabindex="-1"
     style="outline: none"
   >
@@ -13,7 +13,7 @@
         :width="width"
         :height="height"
         class="shadow"
-        :class="{ draggable, dragging }"
+        :class="{ draggable, dragging, 'content-editable': contentEditable }"
         @mousedown="mouseDownDragging"
       >
         <rect
@@ -28,14 +28,56 @@
         ></rect>
 
         <foreignObject ref="foreign" x="0" y="0" :width="width" :height="height">
-          <div ref="div" xmlns="http://www.w3.org/1999/xhtml" class="foreign-div">
-            Lorem ipsum
+          <div
+            ref="textDiv"
+            xmlns="http://www.w3.org/1999/xhtml"
+            class="foreign-div"
+          >
+            <span :contenteditable="contentEditable" class="node-text">Lorem ipsum</span>
           </div>
         </foreignObject>
       </svg>
     </g>
 
-    <g v-if="editing">
+    <g v-if="showControls">
+      <svg :x="x" :y="y - 30" :width="width" @mousedown="toggleContentEditable">
+        <g>
+          <ellipse
+            :x="(width * 1/2) - 2"
+            :y="12"
+            :cx="(width * 1/2) - 2"
+            :cy="12"
+            width="12"
+            height="12"
+            rx="12"
+            ry="12"
+            fill="#4D4D4D"
+          ></ellipse>
+
+          <svg
+            :x="(width * 1/2) - 9"
+            :cx="(width * 1/2) - 9"
+            :y="4"
+            :cy="11"
+            width="15"
+            height="15"
+            viewBox="0 0 1792 1792"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="white"
+          >
+            <!-- Source: https://github.com/encharm/Font-Awesome-SVG-PNG/tree/master/black/svg -->
+            <path
+              v-if="contentEditable"
+              d="M1490 1322q0 40-28 68l-136 136q-28 28-68 28t-68-28l-294-294-294 294q-28 28-68 28t-68-28l-136-136q-28-28-28-68t28-68l294-294-294-294q-28-28-28-68t28-68l136-136q28-28 68-28t68 28l294 294 294-294q28-28 68-28t68 28l136 136q28 28 28 68t-28 68l-294 294 294 294q28 28 28 68z"
+            />
+            <path
+              v-else
+              d="M491 1536l91-91-235-235-91 91v107h128v128h107zm523-928q0-22-22-22-10 0-17 7l-542 542q-7 7-7 17 0 22 22 22 10 0 17-7l542-542q7-7 7-17zm-54-192l416 416-832 832h-416v-416zm683 96q0 53-37 90l-166 166-416-416 166-165q36-38 90-38 53 0 91 38l235 234q37 39 37 91z"
+            />
+          </svg>
+        </g>
+      </svg>
+
       <ellipse
         :x="x"
         :y="y"
@@ -144,7 +186,8 @@ export default {
 
     dragging: false,
     resizing: false,
-    editing: false,
+    showControls: false,
+    contentEditable: false,
 
     cursorOffset: {
       x: 0,
@@ -177,7 +220,7 @@ export default {
 
   methods: {
     mouseDownDragging (e) {
-      this.editing = true
+      this.showControls = true
 
       if (!this.draggable) {
         return
@@ -210,13 +253,18 @@ export default {
       document.removeEventListener('mouseup', this.mouseUpDragging)
     },
 
-    startEditing () {
-      this.editing = true
-      document.body.addEventListener('click', this.stopEditing)
+    displayControls () {
+      this.showControls = true
+      document.body.addEventListener('click', this.hideControls)
     },
 
-    stopEditing () {
-      this.editing = false
+    hideControls (e) {
+      if (e.target === this.$el) {
+        // little hack since when you're editing content
+        // the blue function thinks the component itself is outside it
+        return
+      }
+      this.showControls = false
     },
 
     resize () {
@@ -264,6 +312,12 @@ export default {
 
       document.removeEventListener('mousemove', this.mouseMoveResize)
       document.removeEventListener('mouseup', this.mouseUpResizing)
+    },
+
+    toggleContentEditable (e) {
+      e.preventDefault()
+      e.stopPropagation()
+      this.contentEditable = !this.contentEditable
     }
   }
 }
@@ -275,6 +329,7 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100%;
+  text-align: center;
 }
 
 .draggable {
@@ -283,5 +338,14 @@ export default {
 
 .draggable.dragging {
   cursor: grabbing;
+}
+
+.content-editable {
+  cursor: text!important;
+}
+
+.node-text {
+  width: 100%;
+  outline: none;
 }
 </style>
