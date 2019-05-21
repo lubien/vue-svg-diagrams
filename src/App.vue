@@ -2,7 +2,7 @@
   <div id="app" ref="parent">
     <svg :width="width" :height="height">
       <rect x="0" y="0" :width="width" :height="width" fill="#dedede"></rect>
-      <Step :width="width" :height="height" :initial-x="10" :initial-y ="10" draggable />
+      <Step :svg-width="width" :svg-height="height" :initial-x="500" :initial-y="200" draggable />
     </svg>
   </div>
 </template>

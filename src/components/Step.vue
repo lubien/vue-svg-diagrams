@@ -1,37 +1,97 @@
 <template>
-  <svg :width="width" :height="height">
-    <svg
-      :x="x"
-      :y="y"
-      width="200"
-      height="100"
-      class="shadow"
-      :class="{ draggable, dragging }"
-      @mousedown="mouseDown"
-    >
-      <rect
-        x="0"
-        y="0"
-        width="100%"
-        height="100%"
-        rx="5"
-        ry="3"
-        fill="white"
-        stroke="#d9d9d9"
-      ></rect>
-      <a v-if="false" target="_blank">
-        <text ref="text" x="50%" y="50%" fill="#34495e" font-family="Meiryo UI, sans-serif" font-size="20" text-anchor="middle">
-          <tspan x="0" dy="0">Lorem ipsum dolor sit amet,</tspan>
-          <tspan x="0" dy="30"> consectetur adipiscing elit.</tspan>
-        </text>
-      </a>
+  <svg
+    :width="svgWidth"
+    :height="svgHeight"
+    @blur="stopEditing"
+    tabindex="-1"
+    style="outline: none"
+  >
+    <g>
+      <svg
+        :x="x"
+        :y="y"
+        :width="width"
+        :height="height"
+        class="shadow"
+        :class="{ draggable, dragging }"
+        @mousedown="mouseDownDragging"
+      >
+        <rect
+          x="0"
+          y="0"
+          :width="width"
+          :height="height"
+          rx="5"
+          ry="3"
+          fill="white"
+          stroke="#d9d9d9"
+        ></rect>
 
-      <foreignObject ref="foreign" x="0" y="0" width="200" height="100">
-        <div ref="div" xmlns="http://www.w3.org/1999/xhtml" class="foreign-div">
-          Lorem ipsum
-        </div>
-      </foreignObject>
-    </svg>
+        <foreignObject ref="foreign" x="0" y="0" :width="width" :height="height">
+          <div ref="div" xmlns="http://www.w3.org/1999/xhtml" class="foreign-div">
+            Lorem ipsum
+          </div>
+        </foreignObject>
+      </svg>
+    </g>
+
+    <g v-if="editing">
+      <ellipse
+        :x="x"
+        :y="y"
+        :cx="x"
+        :cy="y"
+        width="6"
+        height="6"
+        rx="6"
+        ry="6"
+        fill="#c6bde4"
+        style="cursor: nw-resize"
+        @mousedown="startResize({ fixBottom: true, fixRight: true })"
+      ></ellipse>
+
+      <ellipse
+        :x="x"
+        :y="y"
+        :cx="x + width"
+        :cy="y"
+        width="6"
+        height="6"
+        rx="6"
+        ry="6"
+        fill="#c6bde4"
+        style="cursor: ne-resize"
+        @mousedown="startResize({ fixBottom: true, fixLeft: true })"
+      ></ellipse>
+
+      <ellipse
+        :x="x"
+        :y="y"
+        :cx="x"
+        :cy="y + height"
+        width="6"
+        height="6"
+        rx="6"
+        ry="6"
+        fill="#c6bde4"
+        style="cursor: sw-resize"
+        @mousedown="startResize({ fixTop: true, fixRight: true })"
+      ></ellipse>
+
+      <ellipse
+        :x="x"
+        :y="y"
+        :cx="x + width"
+        :cy="y + height"
+        width="6"
+        height="6"
+        rx="6"
+        ry="6"
+        fill="#c6bde4"
+        style="cursor: se-resize"
+        @mousedown="startResize({ fixTop: true, fixLeft: true })"
+      ></ellipse>
+    </g>
   </svg>
 </template>
 
@@ -40,14 +100,24 @@ export default {
   name: 'Step',
 
   props: {
-    width: {
+    svgWidth: {
       type: Number,
       required: true
     },
 
-    height: {
+    svgHeight: {
       type: Number,
       required: true
+    },
+
+    initialWidth: {
+      type: Number,
+      default: 200
+    },
+
+    initialHeight: {
+      type: Number,
+      default: 100
     },
 
     initialX: {
@@ -69,7 +139,12 @@ export default {
   data: () => ({
     x: 0,
     y: 0,
+    width: 200,
+    height: 100,
+
     dragging: false,
+    resizing: false,
+    editing: false,
 
     cursorOffset: {
       x: 0,
@@ -79,16 +154,31 @@ export default {
     dragStart: {
       x: 0,
       y: 0
+    },
+
+    fixedPositions: {
+      top: 0,
+      bottom: 0,
+      left: 0,
+      right: 0
     }
   }),
 
   created () {
     this.x = this.initialX
     this.y = this.initialY
+    this.width = this.initialWidth
+    this.height = this.initialHeight
+  },
+
+  mounted () {
+    // this.resize()
   },
 
   methods: {
-    mouseDown (e) {
+    mouseDownDragging (e) {
+      this.editing = true
+
       if (!this.draggable) {
         return
       }
@@ -99,11 +189,11 @@ export default {
       this.dragStart.y = this.y
       this.dragging = true
 
-      document.addEventListener('mousemove', this.mouseMove)
-      document.addEventListener('mouseup', this.mouseUp)
+      document.addEventListener('mousemove', this.mouseMoveDragging)
+      document.addEventListener('mouseup', this.mouseUpDragging)
     },
 
-    mouseMove (e) {
+    mouseMoveDragging (e) {
       const x = e.pageX
       const y = e.pageY
 
@@ -111,13 +201,69 @@ export default {
       this.y = this.dragStart.y + (y - this.cursorOffset.y)
     },
 
-    mouseUp () {
+    mouseUpDragging () {
       this.dragStart.x = null
       this.dragStart.y = null
       this.dragging = false
 
-      document.removeEventListener('mousemove', this.mouseMove)
-      document.removeEventListener('mouseup', this.mouseUp)
+      document.removeEventListener('mousemove', this.mouseMoveDragging)
+      document.removeEventListener('mouseup', this.mouseUpDragging)
+    },
+
+    startEditing () {
+      this.editing = true
+      document.body.addEventListener('click', this.stopEditing)
+    },
+
+    stopEditing () {
+      this.editing = false
+    },
+
+    resize () {
+      const textWidth = this.$refs.text.getComputedTextLength()
+      const blockWidth = textWidth + 20
+      this.blockWidth = blockWidth
+    },
+
+    startResize ({ fixTop = false, fixBottom = false, fixRight = false, fixLeft = false }) {
+      this.fixedPositions.top = fixTop && this.y
+      this.fixedPositions.bottom = fixBottom && this.y + this.height
+      this.fixedPositions.right = fixRight && this.x + this.width
+      this.fixedPositions.left = fixLeft && this.x
+      this.resizing = true
+
+      document.addEventListener('mousemove', this.mouseMoveResize)
+      document.addEventListener('mouseup', this.mouseUpResizing)
+    },
+
+    mouseMoveResize (e) {
+      const x = e.pageX
+      const y = e.pageY
+
+      if (this.fixedPositions.top) {
+        this.height = Math.max(10, y - this.fixedPositions.top)
+      }
+
+      if (this.fixedPositions.bottom) {
+        this.y = Math.max(0, y)
+        this.height = Math.max(10, this.fixedPositions.bottom - y)
+      }
+
+      if (this.fixedPositions.right) {
+        this.x = Math.max(0, x)
+        this.width = Math.max(10, this.fixedPositions.right - x)
+      }
+
+      if (this.fixedPositions.left) {
+        this.width = Math.max(10, x - this.fixedPositions.left)
+      }
+    },
+
+    mouseUpResizing () {
+      this.resizing = false
+
+      document.removeEventListener('mousemove', this.mouseMoveResize)
+      document.removeEventListener('mouseup', this.mouseUpResizing)
     }
   }
 }
