@@ -2,11 +2,9 @@
   <svg
     :width="svgWidth"
     :height="svgHeight"
-    @blur="hideControls"
-    tabindex="-1"
     style="outline: none"
   >
-    <g>
+    <g ref="inside">
       <svg
         :x="x"
         :y="y"
@@ -220,7 +218,7 @@ export default {
 
   methods: {
     mouseDownDragging (e) {
-      this.showControls = true
+      this.displayControls()
 
       if (!this.draggable) {
         return
@@ -255,16 +253,16 @@ export default {
 
     displayControls () {
       this.showControls = true
-      document.body.addEventListener('click', this.hideControls)
+      document.body.addEventListener('mousedown', this.hideControls)
     },
 
     hideControls (e) {
-      if (e.target === this.$el) {
-        // little hack since when you're editing content
-        // the blue function thinks the component itself is outside it
+      const clickIsOutside = e.target.contains(this.$el) || this.$el.contains(e.target)
+      if (clickIsOutside || this.contentEditable) {
         return
       }
       this.showControls = false
+      document.body.removeEventListener('click', this.hideControls)
     },
 
     resize () {
