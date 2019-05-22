@@ -217,7 +217,7 @@ export default {
     mouseDownDragging (e) {
       this.displayControls()
 
-      if (!this.draggable) {
+      if (!this.draggable || this.contentEditable) {
         return
       }
 
