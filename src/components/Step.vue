@@ -333,6 +333,7 @@ export default {
 
 .draggable.dragging {
   cursor: grabbing;
+  user-select: none;
 }
 
 .content-editable {
