@@ -141,6 +141,11 @@ export default {
   name: 'Step',
 
   props: {
+    id: {
+      type: Number,
+      required: true
+    },
+
     svgWidth: {
       type: Number,
       required: true
@@ -237,6 +242,8 @@ export default {
 
       this.x = this.dragStart.x + (x - this.cursorOffset.x)
       this.y = this.dragStart.y + (y - this.cursorOffset.y)
+
+      this.$emit('updatePosition', this.id)
     },
 
     mouseUpDragging () {
@@ -313,6 +320,15 @@ export default {
       e.preventDefault()
       e.stopPropagation()
       this.contentEditable = !this.contentEditable
+    },
+
+    getInfo () {
+      return {
+        x: this.x,
+        y: this.y,
+        width: this.width,
+        height: this.height
+      }
     }
   }
 }
