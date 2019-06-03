@@ -9,7 +9,7 @@
       </marker>
     </defs>
 
-    <path :d="d" stroke="#000" stroke-width="1" fill="none" marker-end="url(#arrow)" />
+    <path :d="d" stroke="#000" stroke-width="2" fill="none" marker-end="url(#arrow)" />
   </svg>
 </template>
 
