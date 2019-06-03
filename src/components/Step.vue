@@ -31,28 +31,41 @@
             xmlns="http://www.w3.org/1999/xhtml"
             class="foreign-div"
           >
-            <span :contenteditable="contentEditable" class="node-text">Lorem ipsum</span>
+            <span :contenteditable="contentEditable" class="node-text">X</span>
           </div>
         </foreignObject>
       </svg>
     </g>
 
     <g v-if="showControls">
-      <svg :x="x" :y="y - 30" :width="width" @mousedown="toggleContentEditable">
+      <svg :x="x" :y="y - 30" :width="width">
         <g>
           <ellipse
-            :x="(width * 1/2) - 2"
+            :x="(width * 1/2) - 15"
             :y="12"
-            :cx="(width * 1/2) - 2"
+            :cx="(width * 1/2) - 15"
             :cy="12"
             rx="12"
             ry="12"
             fill="#4D4D4D"
+            @mousedown="toggleContentEditable"
+          ></ellipse>
+
+
+          <ellipse
+            :x="(width * 1/2) + 15"
+            :y="12"
+            :cx="(width * 1/2) + 15"
+            :cy="12"
+            rx="12"
+            ry="12"
+            fill="#4D4D4D"
+            @click="startLinkMode"
           ></ellipse>
 
           <svg
-            :x="(width * 1/2) - 9"
-            :cx="(width * 1/2) - 9"
+            :x="(width * 1/2) - 22"
+            :cx="(width * 1/2) - 22"
             :y="4"
             :cy="11"
             width="15"
@@ -60,6 +73,7 @@
             viewBox="0 0 1792 1792"
             xmlns="http://www.w3.org/2000/svg"
             fill="white"
+            @mousedown="toggleContentEditable"
           >
             <!-- Source: https://github.com/encharm/Font-Awesome-SVG-PNG/tree/master/black/svg -->
             <path
@@ -70,6 +84,22 @@
               v-else
               d="M491 1536l91-91-235-235-91 91v107h128v128h107zm523-928q0-22-22-22-10 0-17 7l-542 542q-7 7-7 17 0 22 22 22 10 0 17-7l542-542q7-7 7-17zm-54-192l416 416-832 832h-416v-416zm683 96q0 53-37 90l-166 166-416-416 166-165q36-38 90-38 53 0 91 38l235 234q37 39 37 91z"
             />
+          </svg>
+
+          <svg
+            :x="(width * 1/2) + 8"
+            :cx="(width * 1/2) + 8"
+            :y="4"
+            :cy="11"
+            width="15"
+            height="15"
+            viewBox="0 0 1792 1792"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="white"
+            @click="startLinkMode"
+          >
+            <!-- Source: https://github.com/encharm/Font-Awesome-SVG-PNG/tree/master/black/svg -->
+            <path d="M1600 960q0 54-37 91l-651 651q-39 37-91 37-51 0-90-37l-75-75q-38-38-38-91t38-91l293-293h-704q-52 0-84.5-37.5t-32.5-90.5v-128q0-53 32.5-90.5t84.5-37.5h704l-293-294q-38-36-38-90t38-90l75-75q38-38 90-38 53 0 91 38l651 651q37 35 37 90z"/>
           </svg>
         </g>
       </svg>
@@ -329,6 +359,10 @@ export default {
         width: this.width,
         height: this.height
       }
+    },
+
+    startLinkMode () {
+      this.$emit('createLink', this.id, this.getInfo())
     }
   }
 }
