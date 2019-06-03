@@ -138,6 +138,10 @@ export default {
       this.height = height
     },
 
+    handleStepResize ({ id }) {
+      this.handleUpdatePosition(id)
+    },
+
     handleUpdatePosition (id) {
       const ref = this.$refs[`node:${id}`][0]
       this.positions = Object.assign({}, this.positions, { [id]: ref.getInfo() })

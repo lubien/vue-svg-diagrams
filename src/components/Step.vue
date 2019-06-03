@@ -337,6 +337,14 @@ export default {
       if (this.fixedPositions.left) {
         this.width = Math.max(MIN_WIDTH, x - this.fixedPositions.left)
       }
+
+      this.$emit('resize', {
+        id: this.id,
+        x: this.x,
+        y: this.y,
+        width: this.width,
+        height: this.height
+      })
     },
 
     mouseUpResizing () {
