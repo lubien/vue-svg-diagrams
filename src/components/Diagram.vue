@@ -20,6 +20,7 @@
         :svg-height="height"
         :from="positions[edge.from]"
         :to="positions[edge.to]"
+        @click.native="handleArrowClick(edge.id)"
       />
       <Arrow
         v-if="nextEdgeFrom && (nextEdgeTo || mousePosition)"
@@ -210,6 +211,10 @@ export default {
         x: e.pageX,
         y: e.pageY
       }
+    },
+
+    handleArrowClick (id) {
+      this.edges = this.edges.filter(edge => edge.id !== id)
     }
   }
 }
